@@ -271,6 +271,7 @@ const SETTLED_TAIL_PAGE_COUNT = 25;
 const SETTLED_SHELF_EXPANDED_KEY = "t3code:sidebar:settled-expanded";
 const SNOOZED_SHELF_EXPANDED_KEY = "t3code:sidebar:snoozed-expanded";
 const WORKING_SHELF_EXPANDED_KEY = "t3code:sidebar:working-expanded";
+const PINNED_SHELF_EXPANDED_KEY = "t3code:sidebar:pinned-expanded";
 
 const inboxReturns = createInboxReturnTracker();
 
@@ -390,6 +391,11 @@ function useSidebarThreads(input: {
     false,
     Schema.Boolean,
   );
+  const [pinnedShelfExpanded, setPinnedShelfExpanded] = useLocalStorage(
+    PINNED_SHELF_EXPANDED_KEY,
+    true,
+    Schema.Boolean,
+  );
   const [workingShelfExpanded, setWorkingShelfExpanded] = useLocalStorage(
     WORKING_SHELF_EXPANDED_KEY,
     false,
@@ -439,8 +445,11 @@ function useSidebarThreads(input: {
   const visibleWorkingThreads = workingShelfExpanded
     ? workingThreads
     : routeThreadOnly(workingThreads, routeRowThreadKey);
+  const visiblePinnedThreads = pinnedShelfExpanded
+    ? pinnedThreads
+    : routeThreadOnly(pinnedThreads, routeRowThreadKey);
   const orderedThreads = [
-    ...pinnedThreads,
+    ...visiblePinnedThreads,
     ...activeThreads,
     ...visibleWorkingThreads,
     ...visibleSnoozedThreads,
@@ -481,6 +490,9 @@ function useSidebarThreads(input: {
     toggleSnoozedShelf: () => setSnoozedShelfExpanded((value) => !value),
     workingShelfExpanded,
     toggleWorkingShelf: () => setWorkingShelfExpanded((value) => !value),
+    pinnedShelfExpanded,
+    togglePinnedShelf: () => setPinnedShelfExpanded((value) => !value),
+    visiblePinnedThreads,
     renderedSettledThreads,
     visibleSnoozedThreads,
     visibleWorkingThreads,
@@ -1039,6 +1051,9 @@ export default function Sidebar() {
     toggleSnoozedShelf,
     workingShelfExpanded,
     toggleWorkingShelf,
+    pinnedShelfExpanded,
+    togglePinnedShelf,
+    visiblePinnedThreads,
     renderedSettledThreads,
     visibleSnoozedThreads,
     visibleWorkingThreads,
@@ -1578,6 +1593,15 @@ export default function Sidebar() {
         event.activatorEvent instanceof PointerEvent ? event.activatorEvent.clientY : null,
     });
   };
+  // A collapsed pinned shelf hides most of its rows, so the rendered order can't
+  // place a drop among them. Append instead, keeping hidden pins in order.
+  const resolvePinnedShelfTarget = (
+    target: ReturnType<typeof resolveSidebarDropTarget>,
+    movedKey: string,
+  ): ReturnType<typeof resolveSidebarDropTarget> =>
+    target?.section === "pinned" && !pinnedShelfExpanded
+      ? { ...target, pinnedOrder: [...pinnedKeys.filter((key) => key !== movedKey), movedKey] }
+      : target;
   const sidebarListItemsFresh = ((): readonly SidebarListItem[] => {
     const rowsOf = (
       list: readonly EnvironmentThreadShell[],
@@ -1598,7 +1622,7 @@ export default function Sidebar() {
       return [];
     }
     const items: SidebarListItem[] = [{ kind: "marker", marker: "pinned-header" }];
-    const pinnedRows = rowsOf(pinnedThreads, "pinned");
+    const pinnedRows = rowsOf(visiblePinnedThreads, "pinned");
     items.push(...pinnedRows);
     items.push({ kind: "marker", marker: "pinned-divider" });
     const activeRows = rowsOf(activeThreads, "active");
@@ -1703,7 +1727,10 @@ export default function Sidebar() {
     if (source === undefined) return createSidebarCollisionDetection(() => false);
     return createSidebarCollisionDetection(
       (id) => {
-        const target = resolveSidebarDropTarget(sidebarListItems, draggedThreadKey, id);
+        const target = resolvePinnedShelfTarget(
+          resolveSidebarDropTarget(sidebarListItems, draggedThreadKey, id),
+          draggedThreadKey,
+        );
         if (target === null) return false;
         return (
           planSidebarThreadDrop({
@@ -1737,7 +1764,10 @@ export default function Sidebar() {
     const target =
       event.over === null
         ? null
-        : resolveSidebarDropTarget(sidebarListItems, activeKey, String(event.over.id));
+        : resolvePinnedShelfTarget(
+            resolveSidebarDropTarget(sidebarListItems, activeKey, String(event.over.id)),
+            activeKey,
+          );
     const activeThread = threadByKey.get(activeKey);
     if (activeSection === undefined || target === null || activeThread === undefined) return;
     const threadRef = scopeThreadRef(activeThread.environmentId, activeThread.id);
@@ -2972,9 +3002,18 @@ export default function Sidebar() {
                               <SidebarDragBoundary
                                 key="pinned-header"
                                 marker="pinned-header"
-                                label="Pinned"
+                                label={
+                                  pinnedShelfExpanded || pinnedThreads.length === 0
+                                    ? "Pinned"
+                                    : `Pinned (${pinnedThreads.length})`
+                                }
                                 visible={from !== null}
                                 isDropTarget={dragTargetSection === "pinned"}
+                                toggle={
+                                  pinnedThreads.length > 0
+                                    ? { expanded: pinnedShelfExpanded, onToggle: togglePinnedShelf }
+                                    : undefined
+                                }
                               />,
                             );
                             break;
