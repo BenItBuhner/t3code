@@ -69,7 +69,27 @@ export function SidebarDragBoundary(props: {
   label: string;
   visible: boolean;
   isDropTarget: boolean;
+  /** Turns the boundary into a collapsible shelf header, like Working and Settled. */
+  toggle?: { expanded: boolean; onToggle: () => void } | undefined;
 }) {
+  if (props.toggle) {
+    return (
+      <SortableSidebarMarker
+        marker={props.marker}
+        data-testid={`sidebar-${props.marker}`}
+        className="mx-0.5 h-8"
+      >
+        <CollapsibleSectionHeader
+          onClick={props.toggle.onToggle}
+          expanded={props.toggle.expanded}
+          tone={props.isDropTarget ? "accent" : props.visible ? "emphasized" : "muted"}
+          data-testid="sidebar-pinned-shelf-toggle"
+        >
+          {props.label}
+        </CollapsibleSectionHeader>
+      </SortableSidebarMarker>
+    );
+  }
   return (
     <SortableSidebarMarker
       marker={props.marker}
