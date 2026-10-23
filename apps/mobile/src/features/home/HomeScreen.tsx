@@ -64,6 +64,7 @@ import {
   ThreadListV2SettledShelfHeader,
   ThreadListV2ShowMoreRow,
   ThreadListV2SnoozedShelfHeader,
+  ThreadListV2PinnedShelfHeader,
   ThreadListV2WorkingShelfHeader,
 } from "../threads/thread-list-v2-items";
 import { useThreadRowProviderInstanceResolver } from "../threads/thread-provider-instance";
@@ -434,6 +435,9 @@ export function HomeScreen(props: HomeScreenProps) {
     toggleSettledShelf,
     toggleSnoozedShelf,
     toggleWorkingShelf,
+    pinnedShelfEnabled,
+    pinnedShelfExpanded,
+    togglePinnedShelf,
   } = useThreadListV2ShelfPreferences();
   const now = useThreadListNow(props.threads);
   const listEnvironments = useAtomValue(threadListEnvironmentsAtom);
@@ -474,6 +478,8 @@ export function HomeScreen(props: HomeScreenProps) {
     shelfPreferencesLoaded,
     workingShelfEnabled,
     workingShelfExpanded,
+    pinnedShelfEnabled,
+    pinnedShelfExpanded,
     snoozedShelfExpanded,
     settledShelfExpanded,
     selectedThreadKey,
@@ -533,6 +539,16 @@ export function HomeScreen(props: HomeScreenProps) {
           onSwipeableWillOpen={handleSwipeableWillOpen}
           simultaneousSwipeGesture={homeScrollGesture}
           activationKey={item.key}
+        />
+      );
+    }
+    if (item.type === "v2-pinned-shelf") {
+      return (
+        <ThreadListV2PinnedShelfHeader
+          count={item.count}
+          disabled={item.disabled}
+          expanded={item.expanded}
+          onToggle={togglePinnedShelf}
         />
       );
     }

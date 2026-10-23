@@ -471,11 +471,13 @@ function useSidebarThreads(input: {
     false,
     Schema.Boolean,
   );
-  const [pinnedShelfExpanded, setPinnedShelfExpanded] = useLocalStorage(
+  const pinnedShelfCollapsible = useClientSettings((s) => s.sidebarPinnedShelfCollapsible);
+  const [storedPinnedShelfExpanded, setPinnedShelfExpanded] = useLocalStorage(
     PINNED_SHELF_EXPANDED_KEY,
     true,
     Schema.Boolean,
   );
+  const pinnedShelfExpanded = !pinnedShelfCollapsible || storedPinnedShelfExpanded;
   const [workingShelfExpanded, setWorkingShelfExpanded] = useLocalStorage(
     WORKING_SHELF_EXPANDED_KEY,
     false,
@@ -614,6 +616,7 @@ function useSidebarThreads(input: {
       const keys = sidebarFolderExpansionKeys(group);
       setProjectExpanded(keys, !resolveProjectExpanded(projectExpandedById, keys));
     },
+    pinnedShelfCollapsible,
     pinnedShelfExpanded,
     togglePinnedShelf: () => setPinnedShelfExpanded((value) => !value),
     visiblePinnedThreads,
@@ -1342,6 +1345,7 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
     toggleWorkingShelf,
     projectFolders,
     toggleProjectFolder,
+    pinnedShelfCollapsible,
     pinnedShelfExpanded,
     togglePinnedShelf,
     visiblePinnedThreads,
@@ -3366,7 +3370,8 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
                               folderRow ??
                               (section === "working" ||
                               section === "snoozed" ||
-                              section === "settled"
+                              section === "settled" ||
+                              (section === "pinned" && pinnedShelfCollapsible)
                                 ? `shelf:${section}`
                                 : undefined)
                             }
@@ -3501,16 +3506,16 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
                               <SidebarDragBoundary
                                 key="pinned-header"
                                 marker="pinned-header"
-                                label={
-                                  pinnedShelfExpanded || pinnedThreads.length === 0
-                                    ? "Pinned"
-                                    : `Pinned (${pinnedThreads.length})`
-                                }
+                                label="Pinned"
                                 visible={from !== null}
                                 isDropTarget={dragTargetSection === "pinned"}
                                 toggle={
-                                  pinnedThreads.length > 0
-                                    ? { expanded: pinnedShelfExpanded, onToggle: togglePinnedShelf }
+                                  pinnedShelfCollapsible && pinnedThreads.length > 0
+                                    ? {
+                                        expanded: pinnedShelfExpanded,
+                                        onToggle: togglePinnedShelf,
+                                        count: pinnedThreads.length,
+                                      }
                                     : undefined
                                 }
                               />,

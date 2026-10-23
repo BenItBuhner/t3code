@@ -73,6 +73,7 @@ import {
   ThreadListV2SettledShelfHeader,
   ThreadListV2ShowMoreRow,
   ThreadListV2SnoozedShelfHeader,
+  ThreadListV2PinnedShelfHeader,
   ThreadListV2WorkingShelfHeader,
 } from "./thread-list-v2-items";
 import { useThreadRowProviderInstanceResolver } from "./thread-provider-instance";
@@ -283,6 +284,9 @@ function ThreadNavigationSidebarPane(
     toggleSettledShelf,
     toggleSnoozedShelf,
     toggleWorkingShelf,
+    pinnedShelfEnabled,
+    pinnedShelfExpanded,
+    togglePinnedShelf,
   } = useThreadListV2ShelfPreferences();
   const now = useThreadListNow(threads);
   const listEnvironments = useAtomValue(threadListEnvironmentsAtom);
@@ -323,6 +327,8 @@ function ThreadNavigationSidebarPane(
     shelfPreferencesLoaded,
     workingShelfEnabled,
     workingShelfExpanded,
+    pinnedShelfEnabled,
+    pinnedShelfExpanded,
     snoozedShelfExpanded,
     settledShelfExpanded,
     selectedThreadKey: props.selectedThreadKey ?? null,
@@ -622,6 +628,16 @@ function ThreadNavigationSidebarPane(
           />
         );
       }
+      case "v2-pinned-shelf":
+        return (
+          <ThreadListV2PinnedShelfHeader
+            count={item.count}
+            disabled={item.disabled}
+            expanded={item.expanded}
+            onToggle={togglePinnedShelf}
+            pane="sidebar"
+          />
+        );
       case "v2-working-shelf":
         return (
           <ThreadListV2WorkingShelfHeader

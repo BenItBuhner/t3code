@@ -454,6 +454,12 @@ export const SETTINGS_SEARCH_ITEMS = [
     searchTerms: ["hide fold running monitoring threads inbox sidebar shelf"],
   },
   {
+    id: "pinned-shelf-collapsible",
+    title: "Collapsible Pinned section",
+    to: "/settings/general",
+    searchTerms: ["pin pins pinned fold hide sidebar shelf collapse"],
+  },
+  {
     id: "boring-sidebar",
     title: "Boring sidebar (group by project)",
     to: "/settings/labs",

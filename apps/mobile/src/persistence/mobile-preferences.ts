@@ -118,6 +118,7 @@ export interface Preferences {
   readonly workingShelfEnabled?: boolean;
   readonly useLastProjectForNewThreads?: boolean;
   readonly lastThreadProject?: typeof ThreadProject.Type;
+  readonly pinnedShelfCollapsible?: boolean;
   readonly modelFavorites?: ReadonlyArray<{
     readonly provider: ProviderInstanceId;
     readonly model: string;
@@ -125,6 +126,7 @@ export interface Preferences {
   readonly threadListSettledShelfExpanded?: boolean;
   readonly threadListSnoozedShelfExpanded?: boolean;
   readonly threadListWorkingShelfExpanded?: boolean;
+  readonly threadListPinnedShelfExpanded?: boolean;
   readonly threadListFilters?: ThreadListFilters;
   readonly pullRequestListFilters?: PullRequestListPreferences;
   readonly workspaceSelections?: WorkspaceSelections;
@@ -198,10 +200,12 @@ function sanitizePreferences(parsed: Preferences): Preferences {
     workingShelfEnabled?: boolean;
     useLastProjectForNewThreads?: boolean;
     lastThreadProject?: typeof ThreadProject.Type;
+    pinnedShelfCollapsible?: boolean;
     modelFavorites?: Preferences["modelFavorites"];
     threadListSettledShelfExpanded?: boolean;
     threadListSnoozedShelfExpanded?: boolean;
     threadListWorkingShelfExpanded?: boolean;
+    threadListPinnedShelfExpanded?: boolean;
     threadListFilters?: ThreadListFilters;
     pullRequestListFilters?: PullRequestListPreferences;
     workspaceSelections?: WorkspaceSelections;
@@ -330,6 +334,9 @@ function sanitizePreferences(parsed: Preferences): Preferences {
   if (isThreadProject(parsed.lastThreadProject)) {
     preferences.lastThreadProject = parsed.lastThreadProject;
   }
+  if (typeof parsed.pinnedShelfCollapsible === "boolean") {
+    preferences.pinnedShelfCollapsible = parsed.pinnedShelfCollapsible;
+  }
   if (Array.isArray(parsed.modelFavorites)) {
     preferences.modelFavorites = parsed.modelFavorites.filter(
       (favorite) =>
@@ -349,6 +356,9 @@ function sanitizePreferences(parsed: Preferences): Preferences {
   }
   if (typeof parsed.threadListWorkingShelfExpanded === "boolean") {
     preferences.threadListWorkingShelfExpanded = parsed.threadListWorkingShelfExpanded;
+  }
+  if (typeof parsed.threadListPinnedShelfExpanded === "boolean") {
+    preferences.threadListPinnedShelfExpanded = parsed.threadListPinnedShelfExpanded;
   }
   if (isThreadListFilters(parsed.threadListFilters)) {
     preferences.threadListFilters = parsed.threadListFilters;
