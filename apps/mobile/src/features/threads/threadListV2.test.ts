@@ -1573,3 +1573,52 @@ describe("Working section beta", () => {
     ]);
   });
 });
+
+describe("collapsible pinned shelf", () => {
+  const threads = [
+    makeThread({ id: ThreadId.make("pin-a"), title: "pin-a", pinnedAt: NOW, pinOrderKey: "a" }),
+    makeThread({ id: ThreadId.make("pin-b"), title: "pin-b", pinnedAt: NOW, pinOrderKey: "b" }),
+    makeThread({ id: ThreadId.make("active"), title: "active" }),
+  ];
+  const build = (input: Partial<Parameters<typeof buildThreadListV2Items>[0]> = {}) =>
+    buildThreadListV2Items({ threads, environmentId: null, searchQuery: "", now: NOW, ...input });
+  const ids = (layout: ReturnType<typeof buildThreadListV2Items>) =>
+    layout.items.map((item) => item.thread.id);
+
+  it("leaves pins alone while the setting is off", () => {
+    const layout = build({ pinnedShelfExpanded: false });
+    expect(ids(layout)).toEqual(["pin-a", "pin-b", "active"]);
+    expect(layout.pinnedShelfHeaderIndex).toBeNull();
+  });
+
+  it("hides pins except the open thread when collapsed", () => {
+    const layout = build({
+      pinnedShelfEnabled: true,
+      pinnedShelfExpanded: false,
+      selectedThreadKey: `${environmentId}:pin-b`,
+    });
+    expect(ids(layout)).toEqual(["pin-b", "active"]);
+    expect(layout.pinnedCount).toBe(2);
+    expect(layout.pinnedShelfHeaderIndex).toBe(0);
+  });
+
+  it("puts the header after queued tasks and above the pins", () => {
+    const layout = build({ pinnedShelfEnabled: true, pinnedShelfExpanded: true });
+    const items = buildThreadListV2ListItems({
+      items: layout.items,
+      pendingTasks: [makePendingTask("queued")],
+      pinnedCount: layout.pinnedCount,
+      pinnedShelfExpanded: true,
+      pinnedShelfHeaderIndex: layout.pinnedShelfHeaderIndex,
+    });
+    expect(
+      items.map((item) =>
+        item.type === "v2-thread"
+          ? item.item.thread.id
+          : item.type === "v2-pending"
+            ? item.pendingTask.title
+            : item.type,
+      ),
+    ).toEqual(["queued", "v2-pinned-shelf", "pin-a", "pin-b", "active"]);
+  });
+});

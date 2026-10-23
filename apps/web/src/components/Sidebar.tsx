@@ -391,11 +391,13 @@ function useSidebarThreads(input: {
     false,
     Schema.Boolean,
   );
-  const [pinnedShelfExpanded, setPinnedShelfExpanded] = useLocalStorage(
+  const pinnedShelfCollapsible = useClientSettings((s) => s.sidebarPinnedShelfCollapsible);
+  const [storedPinnedShelfExpanded, setPinnedShelfExpanded] = useLocalStorage(
     PINNED_SHELF_EXPANDED_KEY,
     true,
     Schema.Boolean,
   );
+  const pinnedShelfExpanded = !pinnedShelfCollapsible || storedPinnedShelfExpanded;
   const [workingShelfExpanded, setWorkingShelfExpanded] = useLocalStorage(
     WORKING_SHELF_EXPANDED_KEY,
     false,
@@ -490,6 +492,7 @@ function useSidebarThreads(input: {
     toggleSnoozedShelf: () => setSnoozedShelfExpanded((value) => !value),
     workingShelfExpanded,
     toggleWorkingShelf: () => setWorkingShelfExpanded((value) => !value),
+    pinnedShelfCollapsible,
     pinnedShelfExpanded,
     togglePinnedShelf: () => setPinnedShelfExpanded((value) => !value),
     visiblePinnedThreads,
@@ -1051,6 +1054,7 @@ export default function Sidebar() {
     toggleSnoozedShelf,
     workingShelfExpanded,
     toggleWorkingShelf,
+    pinnedShelfCollapsible,
     pinnedShelfExpanded,
     togglePinnedShelf,
     visiblePinnedThreads,
@@ -3010,7 +3014,7 @@ export default function Sidebar() {
                                 visible={from !== null}
                                 isDropTarget={dragTargetSection === "pinned"}
                                 toggle={
-                                  pinnedThreads.length > 0
+                                  pinnedShelfCollapsible && pinnedThreads.length > 0
                                     ? { expanded: pinnedShelfExpanded, onToggle: togglePinnedShelf }
                                     : undefined
                                 }
