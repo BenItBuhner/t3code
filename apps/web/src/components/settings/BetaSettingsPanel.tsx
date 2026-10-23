@@ -49,6 +49,33 @@ export function BetaSettingsPanel() {
             />
           }
         />
+        <SettingsRow
+          {...searchableSetting("pinned-shelf-collapsible")}
+          description="Let the Pinned section fold down to a single header, like Working and Settled."
+          resetAction={
+            settings.sidebarPinnedShelfCollapsible !==
+            DEFAULT_UNIFIED_SETTINGS.sidebarPinnedShelfCollapsible ? (
+              <SettingResetButton
+                label="collapsible pinned section"
+                onClick={() =>
+                  updateSettings({
+                    sidebarPinnedShelfCollapsible:
+                      DEFAULT_UNIFIED_SETTINGS.sidebarPinnedShelfCollapsible,
+                  })
+                }
+              />
+            ) : null
+          }
+          control={
+            <Switch
+              checked={settings.sidebarPinnedShelfCollapsible}
+              onCheckedChange={(checked) =>
+                updateSettings({ sidebarPinnedShelfCollapsible: Boolean(checked) })
+              }
+              aria-label="Collapsible Pinned section"
+            />
+          }
+        />
         {/* Clerk is only mounted when this build has T3 Connect. */}
         {hasCloudPublicConfig() ? <GuestLinksRowWithSignIn /> : <GuestLinksRow />}
       </SettingsSection>

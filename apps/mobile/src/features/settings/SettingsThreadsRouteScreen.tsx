@@ -247,6 +247,8 @@ function BetaSettingsSection() {
   const preferences = useAtomValue(mobilePreferencesAtom);
   const workingShelfEnabled =
     AsyncResult.isSuccess(preferences) && preferences.value.workingShelfEnabled === true;
+  const pinnedShelfCollapsible =
+    AsyncResult.isSuccess(preferences) && preferences.value.pinnedShelfCollapsible === true;
 
   return (
     <View className="gap-3">
@@ -257,11 +259,21 @@ function BetaSettingsSection() {
           value={workingShelfEnabled}
           onValueChange={(value) => savePreferences({ workingShelfEnabled: value })}
         />
+        <SettingsSwitchRow
+          icon="pin"
+          label="Collapsible Pinned section"
+          value={pinnedShelfCollapsible}
+          onValueChange={(value) => savePreferences({ pinnedShelfCollapsible: value })}
+        />
       </SettingsSection>
       <Text className="px-2 text-sm text-foreground-muted">
         Fold working and monitoring threads into a Working section. They return to the top of the
         list when they need you. While this is on, active threads are ordered by time and cannot be
         moved.
+      </Text>
+      <Text className="px-2 text-sm text-foreground-muted">
+        Collapsible Pinned section lets pinned threads fold down to a single header, like Working
+        and Settled.
       </Text>
     </View>
   );

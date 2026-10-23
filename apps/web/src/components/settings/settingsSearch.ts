@@ -361,6 +361,12 @@ export const SETTINGS_SEARCH_ITEMS = [
     searchTerms: ["beta share guest invite link teammate watch t3 connect tunnel"],
   },
   {
+    id: "pinned-shelf-collapsible",
+    title: "Collapsible Pinned section",
+    to: "/settings/beta",
+    searchTerms: ["beta pin pins pinned fold hide sidebar shelf collapse"],
+  },
+  {
     id: "auto-settle-inactive-threads",
     title: "Auto-settle inactive threads",
     to: "/settings/general",
